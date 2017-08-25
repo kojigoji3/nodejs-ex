@@ -112,7 +112,12 @@ app.get('/time', function (req, res) {
 });
 
 app.post('/test_post', function (req, res) {
+
+  if (req.body != null && req.body != "" && req.body != {} && req.body != []) {
     res.send(req.body);
+  } else {
+    res.send('{ test_post: -1}');
+  }
 });
 
 /*
