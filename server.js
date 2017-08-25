@@ -110,6 +110,48 @@ app.get('/time', function (req, res) {
     res.render('clock.html', { pageCountMessage : null});
   }
 });
+
+app.post('/test_post', function (req, res) {
+    res.send(req.body);
+});
+
+/*
+app.post('/test_dbsave', function (req, res) {
+  // try to initialize the db on every request if it's not already
+  // initialized.
+  if (!db) {
+    initDb(function(err){});
+  }
+  
+  if (db && req.body != null && req.body != "" && req.body != {}) {
+    var col = db.collection('datas');
+    col.insert(req.body);
+    col.count(function(err, count){
+      res.send('{ data_count: ' + count + '}');
+    });
+  } else {
+    res.send('{ add_count: 0}');
+  }
+});
+
+app.post('/test_dbget', function (req, res) {
+  // try to initialize the db on every request if it's not already
+  // initialized.
+  if (!db) {
+    initDb(function(err){});
+  }
+  
+  if (db) {
+    var col = db.collection('datas');
+    var ary = col.find().toArray();
+    res.send(ary);
+
+  } else {
+    res.send('{ get_count: 0}');
+  }
+});
+*/
+
 ////////////
 
 // error handling
