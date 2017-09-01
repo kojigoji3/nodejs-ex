@@ -1,6 +1,6 @@
 {
   "name": "nodejs-ex",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Node.js sample app for OpenShift 3",
   "main": "server.js",
   "dependencies": {
@@ -11,7 +11,8 @@
     "mocha": "^2.4.5",
     "mongodb": "^2.1.16",
     "morgan": "^1.7.0",
-    "object-assign":"4.1.0"
+    "object-assign":"4.1.0",
+    "body-parser":  "1.0.2"
   },
   "engine": {
     "node": "*",

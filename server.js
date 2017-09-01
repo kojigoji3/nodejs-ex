@@ -4,11 +4,13 @@ var express = require('express'),
     app     = express(),
     eps     = require('ejs'),
     morgan  = require('morgan');
+var bodyParser = require('body-parser');
     
-Object.assign=require('object-assign')
+Object.assign=require('object-assign');
 
 app.engine('html', require('ejs').renderFile);
-app.use(morgan('combined'))
+app.use(morgan('combined'));
+app.use(bodyParser.urlencoded({extended: true}));
 
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
     ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0',
@@ -113,6 +115,7 @@ app.get('/time', function (req, res) {
 
 app.post('/test_post', function (req, res) {
 
+  console.log(req.body);
   if (req.body != null && req.body != "" && req.body != {} && req.body != []) {
     res.send(req.body);
   } else {
@@ -120,7 +123,7 @@ app.post('/test_post', function (req, res) {
   }
 });
 
-/*
+
 app.post('/test_dbsave', function (req, res) {
   // try to initialize the db on every request if it's not already
   // initialized.
@@ -128,18 +131,18 @@ app.post('/test_dbsave', function (req, res) {
     initDb(function(err){});
   }
   
-  if (db && req.body != null && req.body != "" && req.body != {}) {
+  if (db && req.body != null && req.body != "" && req.body != {} && req.body != []) {
     var col = db.collection('datas');
     col.insert(req.body);
     col.count(function(err, count){
-      res.send('{ data_count: ' + count + '}');
+      res.send('{ datas_count: ' + count + '}');
     });
   } else {
     res.send('{ add_count: 0}');
   }
 });
 
-app.post('/test_dbget', function (req, res) {
+app.get('/test_dbget', function (req, res) {
   // try to initialize the db on every request if it's not already
   // initialized.
   if (!db) {
@@ -155,7 +158,7 @@ app.post('/test_dbget', function (req, res) {
     res.send('{ get_count: 0}');
   }
 });
-*/
+
 
 ////////////
 
