@@ -5,13 +5,20 @@ var express = require('express'),
     eps     = require('ejs'),
     morgan  = require('morgan');
 var bodyParser = require('body-parser');
-    
 Object.assign=require('object-assign');
 
 app.engine('html', require('ejs').renderFile);
 app.use(morgan('combined'));
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
+app.use(function(req, res, next){
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 
+
+//DB------
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
     ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0',
     mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL,
@@ -59,6 +66,10 @@ var initDb = function(callback) {
     console.log('Connected to MongoDB at: %s', mongoURL);
   });
 };
+
+
+
+//-IF----------------------
 
 app.get('/', function (req, res) {
   // try to initialize the db on every request if it's not already
@@ -162,6 +173,9 @@ app.get('/test_dbget', function (req, res) {
 
 ////////////
 
+
+
+//-MainRunSet------------------------------------------
 // error handling
 app.use(function(err, req, res, next){
   console.error(err.stack);
