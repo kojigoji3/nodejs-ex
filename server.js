@@ -122,9 +122,7 @@ app.post('/post_sensor_data', function (req, res) {
 
   if (db && req.body != null && req.body != "" && req.body != {} && req.body != []) {
     var nowDate = new Date();
-    
-    var nowDate = new Date();
-    nowDate.setHours(dt.getHours()+9);//UTC adjust
+    nowDate.setHours(nowDate.getHours()+9);//UTC adjust
     var yy = nowDate.getFullYear();
     var mm = nowDate.getMonth();
     var dd = nowDate.getDate();
@@ -204,7 +202,7 @@ app.get('/get_sensor_data', function (req, res) {
   var getyear = req.query.year || req.body.year;
   var getmonth = req.query.month || req.body.month;
   var getday = req.query.day || req.body.day;
-  var gettime = req.query.hour || req.body.date;
+  var gettime = req.query.hour || req.body.hour;
   var yy1 = Number(getyear)
   var mm1 = Number(getmonth);//1-12
   var mm1b = mm1 - 1;//0-11
