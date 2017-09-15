@@ -69,31 +69,27 @@ var initDb = function(callback) {
 
 
 
-//-original----------------------
+//-IF----------------------
+
 app.get('/', function (req, res) {
-  // try to initialize the db on every request if it's not already
-  // initialized.
-  if (!db) {
-    initDb(function(err){});
-  }
-  if (db) {
-    var col = db.collection('counts');
-    // Create a document with request IP and current time of request
-    //col.insert({ip: req.ip, date: Date.now()});
-    col.count(function(err, count){
-      res.render('index.html', { pageCountMessage : count, dbInfo: dbDetails });
-    });
-  } else {
-    res.render('index.html', { pageCountMessage : null});
-  }
+  //if (!db) { initDb(function(err){}); }
+  //if (db) {
+  //  var col = db.collection('counts');
+  //  // Create a document with request IP and current time of request
+  //  //col.insert({ip: req.ip, date: Date.now()});
+  //  col.count(function(err, count){
+  //    res.render('index.html', { pageCountMessage : count, dbInfo: dbDetails });
+  //  });
+  //} else {
+  //  res.render('index.html', { pageCountMessage : null});
+  //}
+  res.render('index.html', { pageCountMessage : null});
 });
 
 app.get('/pagecount', function (req, res) {
   // try to initialize the db on every request if it's not already
   // initialized.
-  if (!db) {
-    initDb(function(err){});
-  }
+  if (!db) { initDb(function(err){}); }
   if (db) {
     db.collection('counts').count(function(err, count ){
       res.send('{ pageCount: ' + count + '}');
@@ -103,27 +99,7 @@ app.get('/pagecount', function (req, res) {
   }
 });
 
-
-
-//-ADD-TEST----------------------
-app.get('/time', function (req, res) {
-  // try to initialize the db on every request if it's not already
-  // initialized.
-  if (!db) {
-    initDb(function(err){});
-  }
-  if (db) {
-    var col = db.collection('counts');
-    // Create a document with request IP and current time of request
-    col.insert({ip: req.ip, date: Date.now()});
-    col.count(function(err, count){
-      res.render('clock.html', { pageCountMessage : count, dbInfo: dbDetails });
-    });
-  } else {
-    res.render('clock.html', { pageCountMessage : null});
-  }
-});
-
+//////////addtest
 app.post('/test_post', function (req, res) {
 
   console.log(req.body);
@@ -133,24 +109,28 @@ app.post('/test_post', function (req, res) {
     res.send('{ test_post: -1}');
   }
 });
+////////////
 
 
-//-ADD-IF----------------------
+
+
+
+
+
 app.post('/post_sensor_data', function (req, res) {
-  // try to initialize the db on every request if it's not already
-  // initialized.
   if (!db) { initDb(function(err){}); }
-  
-  if (db && req.body != null && req.body != "" && req.body != {} && req.body != []) {
 
-    var dt = new Date();
-    dt.setHours(dt.getHours()+9);//UTC時と日本の差分を加算
-    var yy = dt.getFullYear();
-    var mm = dt.getMonth();
-    var dd = dt.getDate();
-    var hh = dt.getHours();
-    var mi = dt.getMinutes();
-    var ss = dt.getSeconds();
+  if (db && req.body != null && req.body != "" && req.body != {} && req.body != []) {
+    var nowDate = new Date();
+    
+    var nowDate = new Date();
+    nowDate.setHours(dt.getHours()+9);//UTC adjust
+    var yy = nowDate.getFullYear();
+    var mm = nowDate.getMonth();
+    var dd = nowDate.getDate();
+    var hh = nowDate.getHours();
+    var mi = nowDate.getMinutes();
+    var ss = nowDate.getSeconds();
     req.body['year'] = Number(yy);
     req.body['month'] = Number(mm)+1; 
     req.body['day'] =  Number(dd);
@@ -160,35 +140,84 @@ app.post('/post_sensor_data', function (req, res) {
     console.log(req.body);
 
     var col = db.collection('sensor_datas');
+    
+    /*
+    for(var i = 0; i < req.body.response.sensors.length; i++){
+      col.insertOne({
+        "date": nowDate.toISOString(),
+        "sensor": req.body.response.sensors[i].sensor_type,
+        "sensor_data": req.body.response.sensors[i],
+      }), (err, res) => {
+        if(!error){
+          //error process
+        }
+      };
+    }*/
     col.insert(req.body);
     col.count(function(err, count){
       res.status(200).send('{ datas_count: ' + count + '}');
     });
-  } else {
-    res.status(500).send('{ add_count: 0}');
+    
+  }
+  else {
+    res.send('{ add_count: 0}');
   }
 });
 
 app.get('/get_sensor_data', function (req, res) {
-  // try to initialize the db on every request if it's not already
-  // initialized.
   if (!db) { initDb(function(err){}); }
 
-  var datas = [];
-  var getyear = req.query.year;
-  var getmonth = req.query.month;
-  var getday = req.query.day;
-  var gettime = req.query.hour;
-  var yy1 = Number(getyear);
+/*
+  var d = req.query.date || req.body.date;
+  var t = req.query.time || req.body.time;
+
+  if(d != "" || t != ""){
+    res.status(400).send("parameter error.");
+    return;
+  }else{
+    var ptn = /[0-9]{8}/;
+    if(!ptn.test(d)){
+      res.status(400).send("parameter error.");
+      return;
+    }else if(d.match(ptn)[0] != d){
+      res.status(400).send("parameter error.");
+      return;
+    }
+  }
+
+  if (db) {
+    var date = new Date(d.substring(0,4) + '-' + d.substring(4,6) + '-' + d.substring(6,8));
+    if(!date.getTime()){
+      res.status(400).send("date format error.");
+      return;
+    }
+    date.setTime(t);
+
+    mongoFind2(db, date)
+    .then((list) => {
+      res.send(list);
+    });
+  } else {
+    res.send('{ get_count: 0}');
+  }
+  */
+  var getyear = req.query.year || req.body.year;
+  var getmonth = req.query.month || req.body.month;
+  var getday = req.query.day || req.body.day;
+  var gettime = req.query.hour || req.body.date;
+  var yy1 = Number(getyear)
   var mm1 = Number(getmonth);//1-12
   var mm1b = mm1 - 1;//0-11
   var dd1 = Number(getday);
   var hh1 = Number(gettime);
+  if(getyear != undefined && getyear != '' && getmonth != undefined && getmonth != ''
+     && getday != undefined  && getday != ''  && gettime != undefined  && gettime != '' 
+     && 0 < yy1 && 0 < mm1 && mm1 <= 12 && 0 < dd1 && dd1 <= 31 && 0 < hh1 && hh1 <= 24){
+    res.status(400).send("parameter error.  year=*&month=*&day=*&hour=*");
+    return;
+  }
 
-  if (db && getyear != undefined && getyear != '' && getmonth != undefined && getmonth != ''
-         && getday != undefined  && getday != ''  && gettime != undefined  && gettime != '' 
-         && 0 < yy1 && 0 < mm1 && mm1 <= 12 && 0 < dd1 && dd1 <= 31 && 0 < hh1 && hh1 <= 24) {
-         
+  if (db) {
     var yesterdate = new Date(yy1, mm1b, dd1, hh1, 0, 0);
     yesterdate.setDate(yesterdate.getDate()-1);
     
@@ -197,8 +226,7 @@ app.get('/get_sensor_data', function (req, res) {
     var mm2 = mm2b+1;//1-12
     var dd2 = yesterdate.getDate();
     var hh2 = yesterdate.getHours();
-         
-         
+
     var col = db.collection('sensor_datas');
     var getquery = { $or : [ 
                             {year : yy2, month : mm2, day : dd2, hour: { $gte: hh2 } }, 
@@ -207,37 +235,52 @@ app.get('/get_sensor_data', function (req, res) {
                    };
     console.log(getquery);
     var ary = col.find(getquery).toArray((error, documents) => {
-      for(var doc of documents){
-        datas.push({'id' : doc.id, 'temperature' : doc.temperature, 'humidity' : doc.humidity, 'pressure' : doc.pressure,
-                    'year' : doc.year,  'month' : doc.month,  'day' : doc.day,  
-                    'hour': doc.hour, 'minute' : doc.minute, 'second' : doc.second  });
-      }
       console.log('OK');
       console.log(documents);
-      res.status(200).json(datas);
+      res.status(200).json(documents);
     });
   } 
   else {
-    res.status(500).send("QueryError year=*&month=*&day=*&hour=*");
+    res.status(500).send("db error");
+    return;
   }
+  
 });
+
+async function mongoFind2(db, date){
+  date.setDate(date.getDate()- 1);
+
+  var jsn = {};
+  for(var i = 0; i < 9; i++){
+    var datestr = date.toISOString().substring(0,19);
+    jsn[datestr] = {};
+    for(var j = 0; j < sensor.length; j++){
+      var srhDate = new RegExp(date.toISOString().substring(0,10) + 'T' + ('00' + date.getHours()).slice(-2) + '\:[0-9]{2}\:[0-9]{2}\.[0-9]{3}Z');
+      var findRes = await db.collection('sensor_datas').find({
+        "date": srhDate,
+        "sensor": sensor[j],
+      });
+      var docs = findRes.toArray();
+      jsn[datestr][sensor[j]] = docs;
+    }
+    date.setHours(date.getHours()+3);
+  }
+  console.log(jsn);
+  return jsn;
+}
+
+
 app.get('/get_sensor_all', function (req, res) {
   // try to initialize the db on every request if it's not already
   // initialized.
   if (!db) { initDb(function(err){}); }
-  var datas = [];
   if (db) {
          
     var col = db.collection('sensor_datas');
     var getquery = {};
     var ary = col.find(getquery).toArray((error, documents) => {
-      for(var doc of documents){
-        datas.push({'id' : doc.id, 'temperature' : doc.temperature, 'humidity' : doc.humidity, 'pressure' : doc.pressure,
-                    'year' : doc.year,  'month' : doc.month,  'day' : doc.day,  
-                    'hour': doc.hour, 'minute' : doc.minute, 'second' : doc.second  });
-      }
       console.log('OK');
-      res.status(200).json(datas);
+      res.status(200).json(documents);
     });
   } 
   else {
@@ -259,8 +302,8 @@ app.get('/delete_sensor_datas', function (req, res) {
     res.status(500).send('Delete Error');
   }
 });
+//-------------------------------------------------------------------------------------
 
-////////////
 
 
 
