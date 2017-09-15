@@ -144,6 +144,7 @@ app.post('/post_sensor_data', function (req, res) {
   if (db && req.body != null && req.body != "" && req.body != {} && req.body != []) {
 
     var dt = new Date();
+    dt.setHours(dt.getHours()+9);//UTC時と日本の差分を加算
     var yy = dt.getFullYear();
     var mm = dt.getMonth();
     var dd = dt.getDate();
@@ -220,7 +221,29 @@ app.get('/get_sensor_data', function (req, res) {
     res.status(500).send("QueryError year=*&month=*&day=*&hour=*");
   }
 });
-
+app.get('/get_sensor_all', function (req, res) {
+  // try to initialize the db on every request if it's not already
+  // initialized.
+  if (!db) { initDb(function(err){}); }
+  var datas = [];
+  if (db) {
+         
+    var col = db.collection('sensor_datas');
+    var getquery = {};
+    var ary = col.find(getquery).toArray((error, documents) => {
+      for(var doc of documents){
+        datas.push({'id' : doc.id, 'temperature' : doc.temperature, 'humidity' : doc.humidity, 'pressure' : doc.pressure,
+                    'year' : doc.year,  'month' : doc.month,  'day' : doc.day,  
+                    'hour': doc.hour, 'minute' : doc.minute, 'second' : doc.second  });
+      }
+      console.log('OK');
+      res.status(200).json(datas);
+    });
+  } 
+  else {
+    res.status(500).send("UnknownError");
+  }
+});
 
 app.get('/delete_sensor_datas', function (req, res) {
   // try to initialize the db on every request if it's not already
