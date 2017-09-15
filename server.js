@@ -213,6 +213,8 @@ app.get('/get_sensor_data', function (req, res) {
   if(getyear != undefined && getyear != '' && getmonth != undefined && getmonth != ''
      && getday != undefined  && getday != ''  && gettime != undefined  && gettime != '' 
      && 0 < yy1 && 0 < mm1 && mm1 <= 12 && 0 < dd1 && dd1 <= 31 && 0 < hh1 && hh1 <= 24){
+  }
+  else{
     res.status(400).send("parameter error.  year=*&month=*&day=*&hour=*");
     return;
   }
