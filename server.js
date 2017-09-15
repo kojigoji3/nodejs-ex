@@ -247,6 +247,7 @@ app.get('/get_sensor_data', function (req, res) {
   
 });
 
+/*
 async function mongoFind2(db, date){
   date.setDate(date.getDate()- 1);
 
@@ -268,7 +269,7 @@ async function mongoFind2(db, date){
   console.log(jsn);
   return jsn;
 }
-
+*/
 
 app.get('/get_sensor_all', function (req, res) {
   // try to initialize the db on every request if it's not already
