@@ -203,14 +203,14 @@ app.get('/get_sensor_data', function (req, res) {
   var getmonth = req.query.month || req.body.month;
   var getday = req.query.day || req.body.day;
   var gettime = req.query.hour || req.body.hour;
-  var yy1 = Number(getyear)
+  var yy1 = Number(getyear);
   var mm1 = Number(getmonth);//1-12
   var mm1b = mm1 - 1;//0-11
   var dd1 = Number(getday);
   var hh1 = Number(gettime);
   if(getyear != undefined && getyear != '' && getmonth != undefined && getmonth != ''
      && getday != undefined  && getday != ''  && gettime != undefined  && gettime != '' 
-     && 0 < yy1 && 0 < mm1 && mm1 <= 12 && 0 < dd1 && dd1 <= 31 && 0 < hh1 && hh1 <= 24){
+     && 0 < yy1 && 0 < mm1 && mm1 <= 12 && 0 < dd1 && dd1 <= 31 && 0 <= hh1 && hh1 <= 24){
   }
   else{
     res.status(400).send("parameter error.  year=*&month=*&day=*&hour=*");
@@ -289,14 +289,52 @@ app.get('/get_sensor_all', function (req, res) {
   }
 });
 
-app.get('/delete_sensor_datas', function (req, res) {
+app.delete('/delete_sensor_all', function (req, res) {
+  // try to initialize the db on every request if it's not already
+  // initialized.
+  if (!db) { initDb(function(err){}); }
+  if (db) {
+    var col = db.collection('sensor_datas');
+    var ary = col.deleteMany();
+    res.status(200).send('Delete Success');
+  } 
+  else {
+    res.status(500).send('Delete Error');
+  }
+});
+
+app.delete('/delete_sensor_datas', function (req, res) {
   // try to initialize the db on every request if it's not already
   // initialized.
   if (!db) { initDb(function(err){}); }
 
+  var getyear = req.query.year || req.body.year;
+  var getmonth = req.query.month || req.body.month;
+  var getday = req.query.day || req.body.day;
+  var gettime = req.query.hour || req.body.hour;
+  var yy1 = Number(getyear);
+  var mm1 = Number(getmonth);//1-12
+  var dd1 = Number(getday);
+  var hh1 = Number(gettime);
+  var getquery = {};
+  
+  if(getyear != undefined && getyear != '' && getmonth != undefined && getmonth != ''
+     && getday != undefined  && getday != ''  && gettime != undefined  && gettime != '' 
+     && 0 < yy1 && 0 < mm1 && mm1 <= 12 && 0 < dd1 && dd1 <= 31 && 0 <= hh1 && hh1 <= 24){
+      getquery = {year : yy1, month : mm1, day : dd1, hour: hh1 };
+  }
+  else if(getyear != undefined && getyear != '' && getmonth != undefined && getmonth != ''
+          && getday != undefined  && getday != ''  && 0 < yy1 && 0 < mm1 && mm1 <= 12 && 0 < dd1 && dd1 <= 31){
+      getquery = {year : yy1, month : mm1, day : dd1 };
+  }
+  else{
+    res.status(400).send("parameter error.  year=*&month=*&day=*&hour=*");
+    return;
+  }
+
   if (db) {
     var col = db.collection('sensor_datas');
-    var ary = col.deleteMany();
+    var ary = col.deleteMany(getquery);
     res.status(200).send('Delete Success');
   } 
   else {
