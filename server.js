@@ -86,8 +86,8 @@ app.get('/', function (req, res) {
   res.render('index.html', { pageCountMessage : null});
 });
 
-/*
-//app.get('/pagecount', function (req, res) {
+
+app.get('/pagecount', function (req, res) {
   // try to initialize the db on every request if it's not already
   // initialized.
   //if (!db) { initDb(function(err){}); }
@@ -98,9 +98,9 @@ app.get('/', function (req, res) {
   //} else {
   //  res.send('{ pageCount: -1 }');
   //}
-  //res.send('{ pageCount: -1 }');
-//});
-*/
+  res.send('{ pageCount: -1 }');
+});
+
 
 //////////addtest
 app.post('/test_post', function (req, res) {
