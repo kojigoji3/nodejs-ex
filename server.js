@@ -86,18 +86,21 @@ app.get('/', function (req, res) {
   res.render('index.html', { pageCountMessage : null});
 });
 
-app.get('/pagecount', function (req, res) {
+
+//app.get('/pagecount', function (req, res) {
   // try to initialize the db on every request if it's not already
   // initialized.
-  if (!db) { initDb(function(err){}); }
-  if (db) {
-    db.collection('counts').count(function(err, count ){
-      res.send('{ pageCount: ' + count + '}');
-    });
-  } else {
-    res.send('{ pageCount: -1 }');
-  }
-});
+  //if (!db) { initDb(function(err){}); }
+  //if (db) {
+  //  db.collection('counts').count(function(err, count ){
+  //    res.send('{ pageCount: ' + count + '}');
+  //  });
+  //} else {
+  //  res.send('{ pageCount: -1 }');
+  //}
+  //res.send('{ pageCount: -1 }');
+//});
+
 
 //////////addtest
 app.post('/test_post', function (req, res) {
@@ -288,6 +291,53 @@ app.get('/get_sensor_all', function (req, res) {
     res.status(500).send("UnknownError");
   }
 });
+
+
+
+
+
+
+app.get('/get_sensor_late', function (req, res) {
+  if (!db) { initDb(function(err){}); }
+
+  var getnum = req.query.num || req.body.num;
+  var n = Number(getnum);
+  if(getnum != undefined && getnum != '' &&  0 < n){}
+  else{
+    res.status(400).send("parameter error.  num=*");
+    return;
+  }
+
+  if (db) {
+    var col = db.collection('sensor_datas');
+    var ary = col.find().sort({ $natural: -1 }).limit(n).toArray((error, documents) => {
+      console.log('OK');
+      console.log(documents);
+      res.status(200).json(documents);
+    });
+  } 
+  else {
+    res.status(500).send("db error");
+    return;
+  }
+  
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 app.delete('/delete_sensor_all', function (req, res) {
   // try to initialize the db on every request if it's not already
