@@ -86,19 +86,20 @@ app.get('/', function (req, res) {
   res.render('index.html', { pageCountMessage : null});
 });
 
-
 app.get('/pagecount', function (req, res) {
+  res.status(200).send('{ pageCount: -1 }');
+});
+app.get('/pagetest', function (req, res) {
   // try to initialize the db on every request if it's not already
   // initialized.
-  //if (!db) { initDb(function(err){}); }
-  //if (db) {
-  //  db.collection('counts').count(function(err, count ){
-  //    res.send('{ pageCount: ' + count + '}');
-  //  });
-  //} else {
-  //  res.send('{ pageCount: -1 }');
-  //}
-  res.send('{ pageCount: -1 }');
+  if (!db) { initDb(function(err){}); }
+  if (db) {
+    db.collection('counts').count(function(err, count ){
+      res.status(200).send('{ pageCount: ' + count + '}');
+    });
+  } else {
+    res.send('{ pageCount: -1 }');
+  }
 });
 
 
@@ -296,7 +297,7 @@ app.get('/get_sensor_all', function (req, res) {
 
 
 
-/*
+
 app.get('/get_sensor_late', function (req, res) {
   if (!db) { initDb(function(err){}); }
 
@@ -322,7 +323,7 @@ app.get('/get_sensor_late', function (req, res) {
   }
   
 });
-*/
+
 
 
 
