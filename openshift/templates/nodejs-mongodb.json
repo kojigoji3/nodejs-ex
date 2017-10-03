@@ -238,16 +238,18 @@
                   }
                 ],
                 "readinessProbe": {
-                  "timeoutSeconds": 3,
-                  "initialDelaySeconds": 3,
+                  "timeoutSeconds": 10,
+                  "initialDelaySeconds": 600,
+                  "periodSeconds" : 180,
                   "httpGet": {
-                    "path": "/pagecount",
+                    "path": "/pagetest",
                     "port": 8080
                   }
                 },
                 "livenessProbe": {
-                  "timeoutSeconds": 3,
-                  "initialDelaySeconds": 30,
+                  "timeoutSeconds": 10,
+                  "initialDelaySeconds": 600,
+                  "periodSeconds" : 60,
                   "httpGet": {
                     "path": "/pagecount",
                     "port": 8080
@@ -373,8 +375,9 @@
                   }
                 ],
                 "readinessProbe": {
-                  "timeoutSeconds": 1,
-                  "initialDelaySeconds": 3,
+                  "timeoutSeconds": 10,
+                  "initialDelaySeconds": 300,
+                  "periodSeconds" : 200,
                   "exec": {
                     "command": [
                       "/bin/sh",
@@ -385,8 +388,9 @@
                   }
                 },
                 "livenessProbe": {
-                  "timeoutSeconds": 1,
-                  "initialDelaySeconds": 30,
+                  "timeoutSeconds": 10,
+                  "initialDelaySeconds": 300,
+                  "periodSeconds" : 80,
                   "tcpSocket": {
                     "port": 27017
                   }
