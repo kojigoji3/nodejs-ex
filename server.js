@@ -117,7 +117,23 @@ app.post('/test_post', function (req, res) {
 
 
 
+app.post('/import_sensor_data', function (req, res) {
+  if (!db) { initDb(function(err){}); }
 
+  if (db && req.body != null && req.body != "" && req.body != {} && req.body != []) {
+
+    console.log(req.body);
+    var col = db.collection('sensor_datas');
+    col.insert(req.body);
+    col.count(function(err, count){
+      res.status(200).send('{ datas_count: ' + count + '}');
+    });
+    
+  }
+  else {
+    res.send('{ add_count: 0}');
+  }
+});
 
 
 
