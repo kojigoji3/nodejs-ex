@@ -17,6 +17,7 @@ app.use(function(req, res, next){
     next();
 });
 
+app.use(express.static('public'));
 
 //DB------
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
