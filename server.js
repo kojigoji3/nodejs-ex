@@ -86,6 +86,10 @@ app.get('/', function (req, res) {
   res.render('index.html', { pageCountMessage : null});
 });
 
+app.get('/map', function (req, res) {
+  res.render('map.html', {});
+});
+
 app.get('/pagecount', function (req, res) {
   res.status(200).send('{ pageCount: -1 }');
 });
