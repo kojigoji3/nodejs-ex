@@ -22,20 +22,17 @@
         let COLOR_RANGE_LIST = ["#0d688d", "#00b0ec", "#a0a0a0", "#b8ec5e", "#2fc12f", "#fff14f", "#ffa400", "#fb2531"];
         let TEXT_RANGE_LIST = ["-54", "55-59", "60-64", "65-69", "70-74", "75-79", "80-84", "85-"];
         let DEF_ICON_COLOR = "#000000";
-        let DEF_TEXT_COLOR = "#FFFFFF";
+        let DEF_TEXT_COLOR = "#7F7F7F";
+        let DEF_TEXT_COLOR2 = "#FFFFFF";
         let ICON_OPTION = {
             iconSize:[60,60],iconAnchor:[25,35],shadowSize:[0,0],shadowAnchor:[0,0],popupAnchor:[1,-20],
             fillColor:DEF_ICON_COLOR, txtVal:0,txtColor:DEF_TEXT_COLOR
         };
         //アイコンマーカーデータ
-        var geojsonFeatures = [ 
-            {"type": "Feature", "properties": { "name": "センサー1", "sensor_id":0, "value":40 },
-             "geometry": { "type": "Point", "coordinates": [139.798980, 35.689260] } },
-            {"type": "Feature", "properties": { "name": "センサー2", "sensor_id":1, "value":55 },
-             "geometry": { "type": "Point", "coordinates": [139.700504, 35.689869] } },
-            {"type": "Feature", "properties": { "name": "センサー3", "sensor_id":2, "value":80 },
-             "geometry": { "type": "Point", "coordinates": [139.608504, 35.689969] } }
-        ];
+        var geojsonFeatures = []; 
+        //マーカー配置データ
+        var ICONS = null;
+        
 
         //地理院タイル
         var mymap = L.map('mapid').setView([35.705488, 139.602460], 10);
@@ -44,19 +41,6 @@
             maxZoom: 18, minZoom : 5
         }).addTo(mymap);
         
-
-        //マーカー配置
-        var ICONS = L.geoJson(geojsonFeatures, {
-            onEachFeature : function(feature, layer){
-                var ttip = L.tooltip({direction:"top", offset:L.point({x:0,y:-30})}).setContent(feature.properties.name);
-                layer.bindTooltip(ttip);
-            },
-            pointToLayer :  function(feature, latlng){
-                var icon = new L.DivIcon.SVGIcon.UserIcon(ICON_OPTION);
-                var marker = new L.marker(latlng, { icon:icon });
-                return marker;
-            }
-        }).addTo(mymap);
 
         //凡例表示
         var legend = L.control({position:'bottomleft'});
@@ -71,8 +55,70 @@
         legend.addTo(mymap);
         
 
+        //markerデータ取得
+        getmarkerdata();
         //senserデータ取得
         getsenserdata();
+
+
+        //markerデータ取得
+        function getmarkerdata(){
+
+            //データ取得
+            $.ajax({
+                type: "GET",
+                url: "http://nodejs-mongo-persistent-nodejs-mongodb-example.193b.starter-ca-central-1.openshiftapps.com/get_sensor_datas_all",
+                data : { },
+                dataType: "json",
+                async : false,
+                success : function(retdata){
+                    var setdata = -1;
+                    if(retdata == undefined || retdata == null){}
+                    else{ 
+                        var len = retdata.length;
+                        if(0 < len)
+                        {
+                            //markerデータ作成
+                            for(var j = 0; j < len; j++){
+                                let data = retdata[j];
+                                let sid = data.id;
+                                let lon = data.longitude;
+                                let lat = data.latitude;
+                                let tmp = data.temperture;
+                                let hum = data.humidity;
+                                let pre = data.pressure
+                                geojsonFeatures.push({
+                                    "type": "Feature", 
+                                    "properties": { "name": "センサー" + sid, "sensor_id":sid, "value":40, "temperture":tmp, "humidity":hum , "pressure":pre },
+                                    "geometry": { "type": "Point", "coordinates": [lon, lat] } 
+                                 });
+                            }
+                        
+                            //マーカー配置
+                            ICONS = L.geoJson(geojsonFeatures, {
+                                onEachFeature : function(feature, layer){
+                                    var ttip = L.tooltip({direction:"top", offset:L.point({x:0,y:-30})}).setContent(feature.properties.name);
+                                    layer.bindTooltip(ttip);
+                                },
+                                pointToLayer :  function(feature, latlng){
+                                    var icon = new L.DivIcon.SVGIcon.UserIcon(ICON_OPTION);
+                                    var marker = new L.marker(latlng, { icon:icon });
+                                    return marker;
+                                }
+                            }).addTo(mymap);
+                        }
+                        
+                    }
+                },
+                complete : function(retdata){
+                    console.log(retdata);
+                },
+                error: function(xhr, textStatus, error) {
+                    console.log(textStatus);
+                }
+            });
+            
+        }
 
         //senserデータ取得
 		function getsenserdata(){
@@ -95,7 +141,10 @@
                         if(retdata == undefined || retdata == null){}
                         else{ 
                             //setdata = Math.round(Number(retdata.discomfort_index));
-                            setdata = Number(retdata.discomfort_index);
+                            let disval = Number(retdata.discomfort_index);
+                            let disval2 = disval * 1000;
+                            let disval3 = Math.round(disval2) / 1000;
+                            setdata = Number(disval3);
                         }
                         //配色設定
                         setValAndColorMarker(ICONS, setdata, sid);
@@ -108,11 +157,7 @@
                     }
 
                 });
-                
-
-                //配色設定
-                //setValAndColorMarker(ICONS, geojsonFeatures[i].properties.value, sid);
-                
+               
             }
         }
 
@@ -142,7 +187,7 @@
                     }
 
                     //アイコンテキスト配色
-                    var txtcolor = (set_val < 55) ? DEF_TEXT_COLOR : DEF_ICON_COLOR;
+                    var txtcolor = (set_val < 55) ? DEF_TEXT_COLOR2 : DEF_TEXT_COLOR;
 
                     var opt_tmp = $.extend(true, {}, ICON_OPTION);
                     opt_tmp.fillColor = color_icon;
